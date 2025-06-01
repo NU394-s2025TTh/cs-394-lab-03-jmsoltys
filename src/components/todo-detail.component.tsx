@@ -70,6 +70,8 @@ export const TodoDetail: React.FC<TodoDetailProps> = ({ todoId }) => {
           <p>{todo.completed ? 'Completed' : 'Open'} Todo</p>
         </div>
       )}
+      {error && <p>/error loading todo/i</p>}
+      {loading && <p>Loading...</p>}
     </div>
   );
 };
