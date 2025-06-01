@@ -137,6 +137,8 @@ export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
         Show a list of todo&apos;s here. Make it so if you click a todo it calls the event
         handler onSelectTodo with the todo id to show the individual todo
       </p>
+      {loading && <p>/loading todos/i</p>}
+      {error && <p>Error loading todos: {error}</p>}
     </div>
   );
 };
