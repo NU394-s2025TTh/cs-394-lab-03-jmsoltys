@@ -62,6 +62,14 @@ export const TodoDetail: React.FC<TodoDetailProps> = ({ todoId }) => {
   return (
     <div className="todo-detail">
       <h2>Todo Details</h2>
+      {todo && (
+        <div>
+          <h1>Todo {todoId}</h1>
+          <h2>Title: {todo.title}</h2>
+          <h2>Completed</h2>
+          <p>{todo.completed ? 'Completed' : 'Open'} Todo</p>
+        </div>
+      )}
     </div>
   );
 };
