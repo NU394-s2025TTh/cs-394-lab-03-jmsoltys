@@ -59,6 +59,7 @@ export const fetchTodos = async ({
     } else {
       setError('Unknown error when attempting to fetch todos.');
     }
+    setLoading(false);
   }
 };
 
