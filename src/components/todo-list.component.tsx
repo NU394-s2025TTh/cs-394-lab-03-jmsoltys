@@ -67,7 +67,7 @@ export function filterTodos(
   filterCriteria: FilterOptions,
   setFilteredTodos: React.Dispatch<React.SetStateAction<Todo[]>>,
 ): void {
-  let filteredTodos: Todo[] = todos.splice(0);
+  let filteredTodos: Todo[] = todos.slice(0);
 
   if (filterCriteria === 'Open') {
     filteredTodos = todos.filter((todo) => !todo.completed);
@@ -103,11 +103,6 @@ export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
     filterTodos(todos, filterCriteria, setFilteredTodos);
   }, [todos, filterCriteria]);
 
-  console.log('todos', todos);
-  console.log('filteredTodos', filteredTodos);
-  console.log('loading', loading);
-  console.log('error', error);
-
   return (
     <div className="todo-list">
       <h2>Todo List</h2>
@@ -139,6 +134,11 @@ export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
       </p>
       {loading && <p>/loading todos/i</p>}
       {error && <p>Error loading todos: {error}</p>}
+      {filteredTodos.map((todo: Todo) => (
+        <div key={todo.id}>
+          <button onClick={() => onSelectTodo(todo.id)}>Todo {todo.id}</button>
+        </div>
+      ))}
     </div>
   );
 };
