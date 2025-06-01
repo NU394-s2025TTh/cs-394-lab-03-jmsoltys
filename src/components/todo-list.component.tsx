@@ -1,18 +1,21 @@
 // src/components/TodoList.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useEffect } from 'react';
 
 import { Todo } from '../types/todo-type';
 
 interface TodoListProps {
   onSelectTodo: (id: number) => void;
 }
+
 interface FetchTodosParams {
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   setFilteredTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setError: React.Dispatch<React.SetStateAction<string | null>>;
 }
+
 /**
  * fetchTodos function fetches todos from the API and updates the state.
  * @param setTodos - React setState Function to set the todos state.
@@ -28,15 +31,33 @@ interface FetchTodosParams {
  */
 // remove eslint-disable-next-line @typescript-eslint/no-unused-vars when you use the parameters in the function
 export const fetchTodos = async ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setTodos,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setFilteredTodos,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setLoading,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setError,
-}: FetchTodosParams): Promise<void> => {};
+}: FetchTodosParams): Promise<void> => {
+  try {
+    setLoading(true);
+    const todosResponse = await fetch('https://jsonplaceholder.typicode.com/todos');
+    let todos: Todo[];
+
+    if (!todosResponse.ok) {
+      throw new Error(`Error when attempting to fetch todos: ${todosResponse.status}`);
+    } else {
+      todos = await todosResponse.json();
+      setTodos(todos);
+      setLoading(false);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      setError(error.message);
+    } else {
+      setError('Unknown error when attempting to fetch todos.');
+    }
+  }
+};
+
 /**
  * TodoList component fetches todos from the API and displays them in a list.
  * It also provides filter buttons to filter the todos based on their completion status.
@@ -47,6 +68,20 @@ export const fetchTodos = async ({
 // remove the following line when you use onSelectTodo in the component
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<null | string>(null);
+
+  useEffect(() => {
+    fetchTodos({ setTodos, setFilteredTodos, setLoading, setError });
+  }, []);
+
+  console.log('todos', todos);
+  console.log('filteredTodos', filteredTodos);
+  console.log('loading', loading);
+  console.log('error', error);
+
   return (
     <div className="todo-list">
       <h2>Todo List</h2>
