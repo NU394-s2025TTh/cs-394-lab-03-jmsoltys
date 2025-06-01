@@ -16,6 +16,8 @@ interface FetchTodosParams {
   setError: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+type FilterOptions = 'All' | 'Open' | 'Completed';
+
 /**
  * fetchTodos function fetches todos from the API and updates the state.
  * @param setTodos - React setState Function to set the todos state.
@@ -32,23 +34,25 @@ interface FetchTodosParams {
 // remove eslint-disable-next-line @typescript-eslint/no-unused-vars when you use the parameters in the function
 export const fetchTodos = async ({
   setTodos,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setFilteredTodos,
   setLoading,
   setError,
 }: FetchTodosParams): Promise<void> => {
   try {
     setLoading(true);
+
     const todosResponse = await fetch('https://jsonplaceholder.typicode.com/todos');
     let todos: Todo[];
 
     if (!todosResponse.ok) {
-      throw new Error(`Error when attempting to fetch todos: ${todosResponse.status}`);
+      throw new Error(`HTTP error! Status: ${todosResponse.status}`);
     } else {
       todos = await todosResponse.json();
       setTodos(todos);
-      setLoading(false);
+      setFilteredTodos(todos);
     }
+
+    setLoading(false);
   } catch (error) {
     if (error instanceof Error) {
       setError(error.message);
@@ -58,13 +62,30 @@ export const fetchTodos = async ({
   }
 };
 
+export function filterTodos(
+  todos: Todo[],
+  filterCriteria: FilterOptions,
+  setFilteredTodos: React.Dispatch<React.SetStateAction<Todo[]>>,
+): void {
+  let filteredTodos: Todo[] = todos.splice(0);
+
+  if (filterCriteria === 'Open') {
+    filteredTodos = todos.filter((todo) => !todo.completed);
+  } else if (filterCriteria === 'Completed') {
+    filteredTodos = todos.filter((todo) => todo.completed);
+  } else {
+    filteredTodos = todos;
+  }
+
+  setFilteredTodos(filteredTodos);
+}
+
 /**
  * TodoList component fetches todos from the API and displays them in a list.
  * It also provides filter buttons to filter the todos based on their completion status.
  * @param onSelectTodo - A function that is called when a todo is selected. It receives the todo id as an argument.
  * @returns
  */
-
 // remove the following line when you use onSelectTodo in the component
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
@@ -72,10 +93,15 @@ export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
   const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<null | string>(null);
+  const [filterCriteria, setFilterCriteria] = useState<FilterOptions>('All');
 
   useEffect(() => {
     fetchTodos({ setTodos, setFilteredTodos, setLoading, setError });
   }, []);
+
+  useEffect(() => {
+    filterTodos(todos, filterCriteria, setFilteredTodos);
+  }, [todos, filterCriteria]);
 
   console.log('todos', todos);
   console.log('filteredTodos', filteredTodos);
@@ -86,7 +112,7 @@ export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
     <div className="todo-list">
       <h2>Todo List</h2>
       <p>
-        These are the filter buttons. the tests depend on the data-testids; and use
+        These are the filter buttons. The tests depend on the data-testids; and use
         provided styles. Implement click event handlers to change the filter state and
         update the UI accordingly to show just those todo&apos;s. other hints: you can
         change the styling of the button with <code>className</code> property. if the
@@ -94,9 +120,18 @@ export const TodoList: React.FC<TodoListProps> = ({ onSelectTodo }) => {
         <code> .todo-button.completed</code> CSS style in App.css
       </p>
       <div className="filter-buttons">
-        <button data-testid="filter-all">All</button>
-        <button data-testid="filter-open">Open</button>
-        <button data-testid="filter-completed">Completed</button>
+        <button data-testid="filter-all" onClick={() => setFilterCriteria('All')}>
+          All
+        </button>
+        <button data-testid="filter-open" onClick={() => setFilterCriteria('Open')}>
+          Open
+        </button>
+        <button
+          data-testid="filter-completed"
+          onClick={() => setFilterCriteria('Completed')}
+        >
+          Completed
+        </button>
       </div>
       <p>
         Show a list of todo&apos;s here. Make it so if you click a todo it calls the event
