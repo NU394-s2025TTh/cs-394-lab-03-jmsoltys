@@ -51,10 +51,6 @@ export const TodoDetail: React.FC<TodoDetailProps> = ({ todoId }) => {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  console.log('todo:', todo);
-  console.log('loading:', loading);
-  console.log('error:', error);
-
   useEffect(() => {
     fetchTodo({ todoId, setTodo, setLoading, setError });
   }, [todoId]);
